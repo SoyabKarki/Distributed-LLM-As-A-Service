@@ -1,47 +1,58 @@
-import { useState } from 'react'
+import { useState } from 'react';
+import ChatContainer from './components/ChatContainer';
+import MessageList from './components/MessageList';
+import Message from './components/Message';
+import ChatInput from './components/ChatInput';
 
 function App() {
-  const [prompt, setPrompt] = useState('');
-  const [response, setResponse] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setResponse('');
+  const handleSendMessage = async (content) => {
+    // Add user message
+    const userMessage = { id: Date.now(), role: 'user', content };
+    setMessages(prev => [...prev, userMessage]);
+    setIsLoading(true);
+
     try {
-      const response = await fetch('http://localhost:5000/chat', {
+      const response = await fetch('http://localhost:8000/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: content }),
       });
-  }
+
+      const data = await response.json();
+      
+      // Add assistant message
+      const assistantMessage = { 
+        id: Date.now() + 1, 
+        role: 'assistant', 
+        content: data.response 
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      const errorMessage = { 
+        id: Date.now() + 1, 
+        role: 'assistant', 
+        content: 'Error: Could not connect to server.' 
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className='app-container'>
-      <h1>ChatLLM</h1>
-      <form className='prompt-form' onSubmit={handleSubmit}>
-        <textarea
-          placeholder='Enter your prompt'
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          rows={5}
-          required
-        />
-        <button type='submit' disabled={loading}>{loading ? 'Thinking...' : 'Send'}</button>
-      </form>
-
-      {(loading || response) && (
-        <div className='response-container'>
-          <h2>Response:</h2>
-            <pre>
-              {loading ? 'Waiting for the model...' : response}
-            </pre>
-        </div>
-      )}    
-    </div>
-  )
+    <ChatContainer>
+      <MessageList>
+        {messages.map(msg => (
+          <Message key={msg.id} role={msg.role} content={msg.content} />
+        ))}
+        {isLoading && <Message role="assistant" content="Thinking..." isLoading />}
+      </MessageList>
+      <ChatInput onSend={handleSendMessage} disabled={isLoading} />
+    </ChatContainer>
+  );
 }
 
-export default App
+export default App;
