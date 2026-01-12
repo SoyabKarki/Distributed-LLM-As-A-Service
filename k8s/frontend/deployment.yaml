@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: frontend
+  namespace: llm-as-a-service 
+spec:
+  replicas: 2  # 2 replicas to run
+  selector:
+    matchLabels: 
+      app: frontend  # Match the label in the pod template
+  template:
+    metadata: 
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: distributed-llm-as-a-service-frontend:latest  # Use the image built from the Dockerfile in the backend directory
+          imagePullPolicy: Never  # Don't pull the image from a registry, use the locally built image
+          ports:
+            - containerPort: 8000  # Port the container listens on
