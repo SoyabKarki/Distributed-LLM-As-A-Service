@@ -7,7 +7,11 @@ import ChatInput from './components/ChatInput';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 function App() {
+  // messages is an array of objects with id, role, and content
+  // eg: [{ id: 1, role: 'user', content: 'Hello, how are you?' }, 
+  // { id: 2, role: 'assistant', content: 'I am good, thank you!' }]
   const [messages, setMessages] = useState([]);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSendMessage = async (content) => {
@@ -15,6 +19,8 @@ function App() {
     const userMessage = { id: Date.now(), role: 'user', content };
     const updatedMessages = [...messages, userMessage];
 
+    // Each time we send a message or receive a response, we update the messages state
+    // This ensures that the LLM gets the most recent context when generating a response
     setMessages(updatedMessages);
     setIsLoading(true);
 

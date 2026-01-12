@@ -28,7 +28,9 @@ class ChatResponse(BaseModel):
 def trim_context(messages: list[Message], max_messages: int) -> list[Message]:
     """
     Trim the context to the last MAX_CONTEXT_MESSAGES messages.
+    This ensures that the LLM gets context but doesn't get overwhelmed by too much context.
     """
+
     if len(messages) <= max_messages:
         return messages
 

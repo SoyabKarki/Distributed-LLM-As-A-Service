@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: llm-as-a-service
+data:
+  OLLAMA_URL: "http://host.k3d.internal:11434"
+  MODEL_NAME: "qwen2.5:0.5b"
+  MAX_CONTEXT_MESSAGES: "20"
