@@ -4,7 +4,7 @@ import MessageList from './components/MessageList';
 import Message from './components/Message';
 import ChatInput from './components/ChatInput';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 function App() {
   // messages is an array of objects with id, role, and content
