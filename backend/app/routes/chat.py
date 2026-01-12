@@ -6,27 +6,51 @@ import os
 router = APIRouter()
 
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
+MODEL_NAME = os.getenv("MODEL_NAME", "qwen2.5:0.5b")
+MAX_CONTEXT_MESSAGES = int(os.getenv("MAX_CONTEXT_MESSAGES", "20"))
+
+
+class Message(BaseModel):
+    role: str
+    content: str 
 
 
 class ChatRequest(BaseModel):
-    prompt: str
-    model: str = "qwen2.5:0.5b"
+    messages: list[Message]
+    model: str | None = None
 
 
 class ChatResponse(BaseModel):
-    response: str
+    message: Message
     model: str 
+
+
+def trim_context(messages: list[Message], max_messages: int) -> list[Message]:
+    """
+    Trim the context to the last MAX_CONTEXT_MESSAGES messages.
+    """
+    if len(messages) <= max_messages:
+        return messages
+
+    return messages[-max_messages:]
 
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
+
+    model = request.model or MODEL_NAME
+
+    trimmed_messages = trim_context(request.messages, MAX_CONTEXT_MESSAGES)
+    
+    ollama_messages = [{"role": msg.role, "content": msg.content} for msg in trimmed_messages]
+
     async with httpx.AsyncClient(timeout=60.0) as client:
         try:
             response = await client.post(
-                f"{OLLAMA_URL}/api/generate",
+                f"{OLLAMA_URL}/api/chat",
                 json={
-                    "model": request.model,
-                    "prompt": request.prompt,
+                    "model": model,
+                    "messages": ollama_messages,
                     "stream": False,
                 },
             )
@@ -34,11 +58,16 @@ async def chat(request: ChatRequest):
             data = response.json()
 
             return ChatResponse(
-                response=data["response"],
-                model=request.model,
+                message=Message(
+                    role="assistant", 
+                    content=data["message"]["content"]
+                ),
+                model=model,
             )
 
         except httpx.ConnectError:
-            raise HTTPException(status_code=500, detail="Could not connect to Ollama")
+            raise HTTPException(status_code=503, detail="Could not connect to Ollama")
+        except httpx.TimeoutException:
+            raise HTTPException(status_code=504, detail="Ollama request timed out")
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))

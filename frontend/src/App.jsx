@@ -4,6 +4,8 @@ import MessageList from './components/MessageList';
 import Message from './components/Message';
 import ChatInput from './components/ChatInput';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 function App() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -11,15 +13,24 @@ function App() {
   const handleSendMessage = async (content) => {
     // Add user message
     const userMessage = { id: Date.now(), role: 'user', content };
-    setMessages(prev => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+
+    setMessages(updatedMessages);
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/chat', {
+      // Send full message history to backend
+      const response = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: content }),
+        body: JSON.stringify({ 
+          messages: updatedMessages.map(({ role, content }) => ({ role, content }))
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message: ' + response.statusText);
+      }
 
       const data = await response.json();
       
@@ -27,14 +38,14 @@ function App() {
       const assistantMessage = { 
         id: Date.now() + 1, 
         role: 'assistant', 
-        content: data.response 
+        content: data.message.content 
       };
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       const errorMessage = { 
         id: Date.now() + 1, 
         role: 'assistant', 
-        content: 'Error: Could not connect to server.' 
+        content: 'Error: ' + error.message 
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {

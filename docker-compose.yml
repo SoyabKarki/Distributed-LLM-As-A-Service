@@ -9,4 +9,6 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       - OLLAMA_URL=http://host.docker.internal:11434
+      - MODEL_NAME=qwen2.5:0.5b
+      - MAX_CONTEXT_MESSAGES=20
     restart: unless-stopped
