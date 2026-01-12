@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: backend
+  namespace: llm-as-a-service 
+spec:
+  replicas: 2  # 2 replicas to run
+  selector:
+    matchLabels: 
+      app: backend  # Match the label in the pod template
+  template:
+    metadata: 
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: distributed-llm-as-a-service-backend:latest  # Use the image built from the Dockerfile in the backend directory
+          imagePullPolicy: Never  # Don't pull the image from a registry, use the locally built image
+          ports:
+            - containerPort: 8000  # Port the container listens on
+          envFrom:
+            - configMapRef:
+                name: backend-config  # Use the config map to set environment variables
