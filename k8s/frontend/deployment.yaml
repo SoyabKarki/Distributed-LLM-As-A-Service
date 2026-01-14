@@ -19,3 +19,13 @@ spec:
           imagePullPolicy: Never  # Don't pull the image from a registry, use the locally built image
           ports:
             - containerPort: 8000  # Port the container listens on
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 10  # Wait 10 seconds before starting the probe
+            periodSeconds: 30  # Check every 30 seconds
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 5  # Wait 5 seconds before starting the probe
+            periodSeconds: 10  # Check every 10 seconds
