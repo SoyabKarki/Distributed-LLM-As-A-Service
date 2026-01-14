@@ -22,3 +22,10 @@ spec:
           envFrom:
             - configMapRef:
                 name: backend-config  # Use the config map to set environment variables
+          resources:
+            requests:
+              cpu: "100m"  # 100 millicores = 0.1 CPU
+              memory: "128Mi" # 128 MB of memory
+            limits:
+              cpu: "500m" # 0.5 CPU
+              memory: "256Mi" # 256 MB of memory
