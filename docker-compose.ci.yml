@@ -1,0 +1,4 @@
+services:
+  backend:
+    environment:
+      - MODEL_NAME=smollm2:135m
