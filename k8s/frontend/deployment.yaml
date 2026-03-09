@@ -18,7 +18,7 @@ spec:
           image: distributed-llm-as-a-service-frontend:latest  # Use the image built from the Dockerfile in the backend directory
           imagePullPolicy: Never  # Don't pull the image from a registry, use the locally built image
           ports:
-            - containerPort: 8000  # Port the container listens on
+            - containerPort: 80  # Port the container listens on
           livenessProbe:
             tcpSocket:
               port: 80
