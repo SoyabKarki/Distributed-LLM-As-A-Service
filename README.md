@@ -1,6 +1,6 @@
 # Distributed LLM-As-A-Service
 
-A horizontally scalable LLM inference platform built with modern distributed systems principles. This project demonstrates hands-on expertise in full-stack development, container orchestration, and microservices architecture.
+A horizontally scalable LLM inference platform built with modern distributed systems principles. This project delves into full-stack development, container orchestration, and microservices architecture.
 
 
 ## Key Features
@@ -26,6 +26,7 @@ A horizontally scalable LLM inference platform built with modern distributed sys
 | **Ingress** | Traefik |
 | **Auto-Scaling** | Horizontal Pod Autoscaler (HPA) |
 
+**NOTE:** Since I built this project locally on my laptop, some of the tools used here are their lightweight versions. This project was done to understand the fundamentals and get hands-on experience with some of the tools.
 
 ## Architecture Overview
 
@@ -107,7 +108,7 @@ A horizontally scalable LLM inference platform built with modern distributed sys
 
 Clone the repo. Then:
 
-### Option 1: Docker Compose (Development)
+### Option 1: Docker Compose
 
 ```bash
 # Start all services
@@ -117,7 +118,7 @@ docker-compose up --build
 open http://localhost:3000
 ```
 
-### Option 2: Kubernetes (Production-like)
+### Option 2: Kubernetes
 
 ```bash
 # 1. Start Ollama on host
