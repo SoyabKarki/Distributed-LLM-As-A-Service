@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  frontend-backend-integration-test:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -50,3 +50,39 @@ jobs:
       - name: Cleanup
         if: always()
         run: docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v
+  
+  kubernetes-manifest-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Install kubectl
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+        
+      # kubectl dry run
+      - name: Validate manifests with kubectl dry run
+        run: | 
+
+          # Validate namespace
+          kubectl apply --dry-run=client -f k8s/namespace.yaml
+          
+          # Validate backend resources
+          kubectl apply --dry-run=client -f k8s/backend/configmap.yaml
+          kubectl apply --dry-run=client -f k8s/backend/deployment.yaml
+          kubectl apply --dry-run=client -f k8s/backend/service.yaml
+          kubectl apply --dry-run=client -f k8s/backend/hpa.yaml
+          
+          # Validate frontend resources
+          kubectl apply --dry-run=client -f k8s/frontend/deployment.yaml
+          kubectl apply --dry-run=client -f k8s/frontend/service.yaml
+          
+          # Validate ingress
+          kubectl apply --dry-run=client -f k8s/ingress.yaml
+
+          # Validation message
+          echo "Kubernetes manifests validated successfully"
